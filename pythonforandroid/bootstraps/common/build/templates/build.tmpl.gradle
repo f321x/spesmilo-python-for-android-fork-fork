@@ -118,7 +118,7 @@ android {
     }
 
     aaptOptions {
-        noCompress "tflite"
+        noCompress "tflite", 'rcc'
     }
 
 }
