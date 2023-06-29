@@ -9,7 +9,7 @@ class PyjniusRecipe(PyProjectRecipe):
     version = '1.6.1'
     url = 'https://github.com/kivy/pyjnius/archive/{version}.zip'
     name = 'pyjnius'
-    depends = [('genericndkbuild', 'sdl2', 'sdl3', 'qt5'), 'six']
+    depends = [('genericndkbuild', 'sdl2', 'sdl3', 'qt6'), 'six']
     site_packages_name = 'jnius'
 
     patches = [
@@ -17,7 +17,7 @@ class PyjniusRecipe(PyProjectRecipe):
         "cython_version_pin.patch",
         ('genericndkbuild_jnienv_getter.patch', will_build('genericndkbuild')),
         ('sdl3_jnienv_getter.patch', will_build('sdl3')),
-        ('qt5_jnienv_getter.patch', will_build('qt5')),
+        ('qt5_jnienv_getter.patch', will_build('qt6')),
     ]
 
     def get_recipe_env(self, arch, **kwargs):
