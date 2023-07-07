@@ -16,7 +16,6 @@ import sys
 import tarfile
 import tempfile
 import time
-import glob
 import sh
 
 from fnmatch import fnmatch
@@ -43,8 +42,10 @@ def get_dist_info_for(key, error_if_missing=True):
 def get_hostpython():
     return get_dist_info_for('hostpython')
 
+
 def get_python_version():
     return get_dist_info_for('python_version')
+
 
 def get_bootstrap_name():
     return get_dist_info_for('bootstrap')
@@ -224,6 +225,7 @@ def compile_py_file(python_file, optimize_python=True):
 
     return ".".join([os.path.splitext(python_file)[0], "pyc"])
 
+
 def make_qml_rcc(assets_dir):
     def should_include_in_qrc(fname):
         if os.path.isdir(fname):
@@ -237,8 +239,8 @@ def make_qml_rcc(assets_dir):
         return True
 
     # hardcoded for now, should be made automatic/configurable
-    components = ['qtdeclarative', 'qtquickcontrols2', 'qtmultimedia']
-    qt6_path = join('jni', 'qt6')
+    #components = ['qtdeclarative', 'qtquickcontrols2', 'qtmultimedia']
+    #qt6_path = join('jni', 'qt6')
     with open('android_rcc_bundle.qrc', 'w') as qrc_file:
         qrc_file.write('<!DOCTYPE RCC><RCC version="1.0"><qresource>')
 
@@ -674,7 +676,7 @@ main.py that loads it.''')
             'arrays.tmpl.xml',
             join(res_dir, 'values', 'arrays.xml'),
             arch=get_dist_info_for("archs")[0],
-            python_lib= "python%s" % get_python_version() )
+            python_lib="python%s" % get_python_version())
 
     # Library resources from Qt
     # These are referred by QtLoader.java in Qt6AndroidBindings.jar
