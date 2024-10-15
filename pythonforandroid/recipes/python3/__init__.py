@@ -55,7 +55,7 @@ class Python3Recipe(TargetPythonRecipe):
         :class:`~pythonforandroid.python.GuestPythonRecipe`
     '''
 
-    version = '3.11.5'
+    version = '3.10.10'
     url = 'https://www.python.org/ftp/python/{version}/Python-{version}.tgz'
     name = 'python3'
 
@@ -72,6 +72,9 @@ class Python3Recipe(TargetPythonRecipe):
         ('patches/py3.8.1.patch', version_starts_with("3.9")),
         ('patches/py3.8.1.patch', version_starts_with("3.10")),
         ('patches/cpython-311-ctypes-find-library.patch', version_starts_with("3.11")),
+
+        ('patches/py3.10_reproducible-pyc.diff', version_starts_with("3.10")),
+        ('patches/py3.10_reproducible-marshal_flagref.patch', version_starts_with("3.10")),
     ]
 
     if shutil.which('lld') is not None:
