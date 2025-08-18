@@ -16,6 +16,7 @@ class Qt6Recipe(BootstrapNDKRecipe):
     depends = ['python3', 'hostqt6']
     conflicts = ['sdl2', 'genericndkbuild']
     # patches = ['add-way-to-disable-accessibility-env-var.patch']
+    patches = ['16kb-page-align.patch']
 
     need_stl_shared = True
 

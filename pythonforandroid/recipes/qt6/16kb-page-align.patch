@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt      2025-08-18 11:04:17.816312226 +0200
++++ b/CMakeLists.txt      2025-08-18 11:04:34.076769220 +0200
+@@ -14,6 +14,8 @@
+ # before the toolchain file is loaded.
+ include("${__qt6_qtbase_src_path}/cmake/QtAutoDetect.cmake")
+
++add_link_options(-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384)
++
+ project(Qt
+     VERSION "${QT_REPO_MODULE_VERSION}"
+     DESCRIPTION "Qt Libraries"
