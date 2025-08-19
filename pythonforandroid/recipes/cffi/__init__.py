@@ -31,7 +31,7 @@ class CffiRecipe(CompiledComponentsPythonRecipe):
         includes = libffi.get_include_dirs(arch)
         env['CFLAGS'] = ' -I'.join([env.get('CFLAGS', '')] + includes)
         env['CFLAGS'] += ' -I{}'.format(self.ctx.python_recipe.include_root(arch.arch))
-        env['LDFLAGS'] = (env.get('CFLAGS', '') + ' -L' +
+        env['LDFLAGS'] = (env.get('LDFLAGS', '') + ' -L' +
                           self.ctx.get_libs_dir(arch.arch))
         env['LDFLAGS'] += ' -L{}'.format(os.path.join(self.ctx.bootstrap.build_dir, 'libs', arch.arch))
         # required for libc and libdl
