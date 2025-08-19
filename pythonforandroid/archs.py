@@ -29,7 +29,7 @@ class Arch:
         '-I{python_includes}',
     ]
 
-    common_ldflags = ['-L{ctx_libs_dir}']
+    common_ldflags = ['-L{ctx_libs_dir}', '-Wl,-z,max-page-size=16384']
 
     common_ldlibs = ['-lm']
 
