@@ -49,7 +49,8 @@ class PyQt6Recipe(Recipe):
             project_dict['tool']['sip']['bindings'][binding] = {
                 'extra-link-args': [
                     '-L{}'.format(self.ctx.python_recipe.link_root(arch.arch)),
-                    '-lpython{}'.format(self.ctx.python_recipe.link_version)
+                    '-lpython{}'.format(self.ctx.python_recipe.link_version),
+                    '-Wl,-z,max-page-size=16384',
                 ],
                 'disabled-features': ['PyQt_Desktop_OpenGL']
             }
