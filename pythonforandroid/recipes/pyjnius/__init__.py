@@ -1,37 +1,22 @@
-from pythonforandroid.recipe import PyProjectRecipe
+from pythonforandroid.recipe import CythonRecipe
 from pythonforandroid.toolchain import shprint, current_directory, info
 from pythonforandroid.patching import will_build
 import sh
 from os.path import join
 
 
-class PyjniusRecipe(PyProjectRecipe):
+class PyjniusRecipe(CythonRecipe):
     version = '1.6.1'
     url = 'https://github.com/kivy/pyjnius/archive/{version}.zip'
     name = 'pyjnius'
     depends = [('genericndkbuild', 'sdl2', 'sdl3', 'qt6'), 'six']
     site_packages_name = 'jnius'
 
-    patches = [
-        "use_cython.patch",
-        "cython_version_pin.patch",
-        ('genericndkbuild_jnienv_getter.patch', will_build('genericndkbuild')),
-        ('sdl3_jnienv_getter.patch', will_build('sdl3')),
-        ('qt6_jnienv_getter.patch', will_build('qt6')),
-    ]
+    patches = [('genericndkbuild_jnienv_getter.patch', will_build('genericndkbuild')),
+               ('qt6_jnienv_getter.patch', will_build('qt6'))]
 
-    def get_recipe_env(self, arch, **kwargs):
-        env = super().get_recipe_env(arch, **kwargs)
-
-        # Taken from CythonRecipe
-        env['LDFLAGS'] = env['LDFLAGS'] + ' -L{} '.format(
-            self.ctx.get_libs_dir(arch.arch) +
-            ' -L{} '.format(self.ctx.libs_dir) +
-            ' -L{}'.format(join(self.ctx.bootstrap.build_dir, 'obj', 'local',
-                                arch.arch)))
-        env['LDSHARED'] = env['CC'] + ' -shared'
-        env['LIBLINK'] = 'NOTNONE'
-
+    def get_recipe_env(self, arch):
+        env = super().get_recipe_env(arch)
         # NDKPLATFORM is our switch for detecting Android platform, so can't be None
         env['NDKPLATFORM'] = "NOTNONE"
         return env
