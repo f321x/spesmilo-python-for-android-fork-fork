@@ -25,7 +25,7 @@ from pythonforandroid.logger import (
     logger, info, warning, debug, shprint, info_main, error)
 from pythonforandroid.util import (
     current_directory, ensure_dir, BuildInterruptingException, rmdir, move,
-    touch, patch_wheel_setuptools_logging)
+    touch, patch_wheel_setuptools_logging, temp_directory, HashPinnedDependency)
 from pythonforandroid.util import load_source as import_recipe
 
 
@@ -1063,27 +1063,58 @@ class PythonRecipe(Recipe):
         parsed_version = packaging.version.parse(self.ctx.python_recipe.version)
         return f"{parsed_version.major}.{parsed_version.minor}"
 
-    def install_hostpython_prerequisites(self, packages=None, force_upgrade=True):
+    def install_hostpython_prerequisites(self, packages=None, force_upgrade=True, pip_extra_args=None):
         if not packages:
             packages = self.hostpython_prerequisites
 
         if len(packages) == 0:
             return
 
-        pip_options = [
-            "install",
-            *packages,
-            "--target", self._host_recipe.site_dir, "--python-version",
-            self.ctx.python_recipe.version,
+        default_pip_options = [
             # Don't use sources, instead wheels
             "--only-binary=:all:",
+            # Even for hash pinning --upgrade is needed to regen __pycache__ dirs
+            "--upgrade",
         ]
-        if force_upgrade:
-            pip_options.append("--upgrade")
-        # Use system's pip
-        pip_env = self.get_hostrecipe_env()
-        pip_env["HOME"] = "/tmp"
-        shprint(sh.Command(self.real_hostpython_location), "-m", "pip", *pip_options, _env=pip_env)
+
+        # check if any hashes are declared
+        hash_pin = any(isinstance(package, HashPinnedDependency) for package in packages)
+
+        if not hash_pin:
+            warning('hostpython_prerequisites no hash pinning')
+
+        with temp_directory() as tempdir:
+            with open(join(tempdir, 'requirements.txt'), 'w') as reqfile:
+                for package in packages:
+                    if isinstance(package, HashPinnedDependency):
+                        hashes_str = ''
+                        for h in package.hashes:
+                            hashes_str += f' --hash={h}'
+                        requirement_str = f'{package.package}{hashes_str}'
+                    else:
+                        requirement_str = package
+                    reqfile.write(f'{requirement_str}\n')
+                    info(requirement_str)
+
+            pip_options = [
+                "install",
+                "-r", join(tempdir, "requirements.txt"),
+                "--target", self._host_recipe.site_dir, "--python-version",
+                self.ctx.python_recipe.version,
+            ]
+
+            if hash_pin:
+                pip_options.append('--require-hashes')
+
+            if pip_extra_args:
+                pip_options += pip_extra_args
+            else:
+                pip_options += default_pip_options
+
+            # Use system's pip
+            pip_env = self.get_hostrecipe_env()
+            pip_env["HOME"] = "/tmp"
+            shprint(sh.Command(self.real_hostpython_location), "-m", "pip", *pip_options, _env=pip_env)
 
     def restore_hostpython_prerequisites(self, packages):
         _packages = []
@@ -1318,7 +1349,10 @@ class PyProjectRecipe(PythonRecipe):
             return
 
         self.install_hostpython_prerequisites(
-            packages=["build[virtualenv]", "pip", "setuptools"] + self.hostpython_prerequisites
+            packages=self._host_recipe.pyproject_base_dependencies
+        )
+        self.install_hostpython_prerequisites(
+            packages=self.hostpython_prerequisites
         )
         self.patch_shebangs(self._host_recipe.site_bin, self.real_hostpython_location)
 

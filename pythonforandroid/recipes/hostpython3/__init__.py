@@ -60,6 +60,10 @@ class HostPython3Recipe(Recipe):
         '''Returns the full path of the hostpython executable.'''
         return join(self.get_path_to_python(), self._exe_name)
 
+    @property
+    def pyproject_base_dependencies(self):
+        return ["build[virtualenv]", "pip", "setuptools"]
+
     def get_recipe_env(self, arch=None):
         env = os.environ.copy()
         openssl_prereq = OpenSSLPrerequisite()
