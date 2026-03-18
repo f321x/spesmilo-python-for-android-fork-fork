@@ -1027,10 +1027,11 @@ class PythonRecipe(Recipe):
         with current_directory(self.get_build_dir(arch.arch)):
 
             if isfile("setup.py"):
-                shprint(hostpython, 'setup.py', 'install', '-O2',
-                        '--root={}'.format(self.ctx.get_python_install_dir(arch.arch)),
-                        '--install-lib=.',
-                        _env=hpenv, *self.setup_extra_args)
+                if self.install_in_targetpython:
+                    shprint(hostpython, 'setup.py', 'install', '-O2',
+                            '--root={}'.format(self.ctx.get_python_install_dir(arch.arch)),
+                            '--install-lib=.',
+                            _env=hpenv, *self.setup_extra_args)
 
                 # If asked, also install in the hostpython build dir
                 if self.install_in_hostpython:
@@ -1371,13 +1372,48 @@ class PyProjectRecipe(PythonRecipe):
             "builddir={}".format(sub_build_dir),
         ] + self.extra_build_args
 
-        built_wheels = []
         with current_directory(build_dir):
-            shprint(
-                sh.Command(self.ctx.python_recipe.python_exe), *build_args, _env=env
-            )
-            built_wheels = [realpath(whl) for whl in glob.glob("dist/*.whl")]
-        self.install_wheel(arch, built_wheels)
+            if self.install_in_targetpython:
+                shprint(
+                    sh.Command(self.ctx.python_recipe.python_exe), *build_args, _env=env
+                )
+                built_wheels = [realpath(whl) for whl in glob.glob("dist/*.whl")]
+                self.install_wheel(arch, built_wheels)
+
+            # If asked, also install in the hostpython build dir
+            if self.install_in_hostpython:
+                self.install_hostpython_package(arch)
+
+    def install_hostpython_package(self, arch):
+        build_dir = self.get_build_dir(arch.arch)
+        sub_build_dir = join(build_dir, "p4a_hostpython")
+        ensure_dir(sub_build_dir)
+        dist_dir = join(build_dir, "dist_hostpython")
+        env = self.get_hostrecipe_env(arch)
+        build_args = [
+            "-m", "build",
+            "--wheel",
+            "-o", dist_dir,
+            "--config-setting",
+            "builddir={}".format(sub_build_dir),
+        ] + self.extra_build_args
+
+        real_hostpython = sh.Command(self.real_hostpython_location)
+        shprint(real_hostpython, *build_args, _env=env, *self.setup_extra_args)
+
+        whl = glob.glob(f'{dist_dir}/*.whl')[0]
+        pip_options = [
+            'install',
+            '--no-deps',
+            '--root', self._host_recipe.site_root,
+            whl
+        ]
+        # Use system's pip
+        pip_env = self.get_hostrecipe_env()
+        pip_env["HOME"] = "/tmp"
+
+        with current_directory(sub_build_dir):
+            shprint(sh.Command(self.real_hostpython_location), "-m", "pip", *pip_options, _env=pip_env)
 
 
 class MesonRecipe(PyProjectRecipe):
