@@ -893,7 +893,9 @@ tools directory of the Android SDK.
                          'NAME:PATH_TO_PY[:foreground]')
     ap.add_argument('--native-service', dest='native_services', action='append', default=[],
                     help='Declare a new native service: '
-                         'package.name.service')
+                         'package.name.service[:foregroundServiceType[:specialUseSubtype]] '
+                         '(the optional parts are only supported by the qt6 bootstrap; '
+                         'the service runs in the app process)')
     if get_bootstrap_name() != "service_only":
         ap.add_argument('--presplash', dest='presplash',
                         help=('A jpeg file to use as a screen while the '

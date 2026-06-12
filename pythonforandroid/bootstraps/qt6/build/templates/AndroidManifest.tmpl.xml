@@ -128,8 +128,20 @@
         <service android:name="{{ args.package }}.Service{{ name|capitalize }}"
                  android:process=":service_{{ name }}" />
         {% endfor %}
-        {% for name in native_services %}
-        <service android:name="{{ name }}" />
+        {% for spec in native_services %}
+        {% set svc = spec.split(':') %}
+        {% if svc|length > 1 %}
+        <service android:name="{{ svc[0] }}"
+                 android:exported="false"
+                 android:foregroundServiceType="{{ svc[1] }}">
+            {% if svc|length > 2 and svc[1] == 'specialUse' %}
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                      android:value="{{ svc[2] }}" />
+            {% endif %}
+        </service>
+        {% else %}
+        <service android:name="{{ svc[0] }}" />
+        {% endif %}
         {% endfor %}
 
         {% if args.billing_pubkey %}
