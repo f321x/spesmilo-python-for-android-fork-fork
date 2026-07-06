@@ -42,6 +42,10 @@ class HostPython3Recipe(Recipe):
     '''The default url to download our host python recipe. This url will
     change depending on the python version set in attribute :attr:`version`.'''
 
+    # Patch ensurepip to not install setuptools as it is installed hash-pinned separately.
+    # TODO: remove patch once CPython >= 3.12 is used.
+    patches = ['patches/cpython-311-ensurepip-no-setuptools.patch']
+
     build_subdir = 'native-build'
     '''Specify the sub build directory for the hostpython3 recipe. Defaults
     to ``native-build``.'''
