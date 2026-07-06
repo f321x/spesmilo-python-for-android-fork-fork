@@ -169,6 +169,19 @@ class HostPython3Recipe(Recipe):
                 sh.Command(self.python_exe), "-m", "ensurepip", "--root", self.site_root, "-U",
                 _env={"HOME": "/tmp"}
             )
+            # ensurepip (with python <= 3.11) also installed its bundled setuptools.
+            # delete it so we can install a hash-pinned version later, otherwise
+            # there may be two different setuptools in site dirs and which one gets
+            # used during the build is selected based on the sorting order of os.listdir(),
+            # making the build non-reproducible between different OS.
+            shprint(
+                sh.rm, "-rf",
+                *sorted(str(path) for path in Path(self.site_dir).glob("setuptools-*.dist-info")),
+                join(self.site_dir, "setuptools"),
+                join(self.site_dir, "pkg_resources"),
+                join(self.site_dir, "_distutils_hack"),
+                join(self.site_dir, "distutils-precedence.pth"),
+            )
 
 
 recipe = HostPython3Recipe()
