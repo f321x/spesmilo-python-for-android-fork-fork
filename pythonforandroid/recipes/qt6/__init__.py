@@ -184,10 +184,8 @@ class Qt6Recipe(BootstrapNDKRecipe):
     def postbuild_arch(self, arch):
         super().postbuild_arch(arch)
         info('Copying Qt6 java class to classes build dir')
-        # TODO: neatly filter *.java and *.aidl
         with current_directory(self.get_build_dir(arch.arch)):
             shprint(sh.cp, '-a', join('qtbase', 'src', 'android', 'java', 'src', 'org'), self.ctx.javaclass_dir)
-            shprint(sh.cp, '-a', join('qtbase', 'src', 'android', 'java', 'src', 'org'), self.ctx.aidl_dir)
 
 
 recipe = Qt6Recipe()

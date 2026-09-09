@@ -701,3 +701,68 @@ class TestBootstrapQt(GenericBootstrapTest, unittest.TestCase):
     @property
     def bootstrap_name(self):
         return "qt"
+
+
+class TestBootstrapQt6(BaseClassSetupBootstrap, unittest.TestCase):
+    """
+    The qt6 bootstrap's build dir contains the whole Qt tree, so its
+    `assemble_distribution` rsyncs an allowlist into the dist and must not
+    fall through to the base class, which copies the build dir wholesale.
+    """
+
+    @mock.patch("pythonforandroid.bootstraps.qt6.glob.glob")
+    @mock.patch("pythonforandroid.bootstraps.qt6.open", create=True)
+    @mock.patch("pythonforandroid.bootstraps.qt6.ensure_dir")
+    @mock.patch("pythonforandroid.bootstraps.qt6.rmdir")
+    @mock.patch("pythonforandroid.bootstraps.qt6.shprint")
+    @mock.patch("pythonforandroid.bootstraps.qt6.current_directory")
+    @mock.patch("pythonforandroid.bootstrap.Bootstrap._copy_in_final_files")
+    @mock.patch("pythonforandroid.bootstrap.Bootstrap._assemble_distribution_for_arch")
+    @mock.patch("pythonforandroid.bootstrap.Bootstrap.distribute_javaclasses")
+    @mock.patch("pythonforandroid.bootstrap.shprint")
+    @mock.patch("pythonforandroid.bootstrap.rmdir")
+    def test_assemble_distribution(
+        self,
+        mock_base_rmdir,
+        mock_base_shprint,
+        mock_distribute_javaclasses,
+        mock_assemble_for_arch,
+        mock_copy_in_final_files,
+        mock_current_directory,
+        mock_shprint,
+        mock_rmdir,
+        mock_ensure_dir,
+        mock_open,
+        mock_glob,
+    ):
+        mock_glob.return_value = ["jni/application/src/start.c"]
+        bs = Bootstrap.get_bootstrap("qt6", self.ctx)
+        bs.build_dir = bs.get_build_dir()
+        self.setUp_distribution_with_bootstrap(bs)
+        bs.distribution.save_info = mock.MagicMock()
+        self.ctx.archs = [ArchARMv7_a(self.ctx)]
+        self.ctx.bootstrap = bs
+
+        bs.assemble_distribution()
+
+        # the dist is recreated from the allowlist...
+        mock_rmdir.assert_called_once_with(bs.dist_dir)
+        mock_ensure_dir.assert_called_once_with(bs.dist_dir)
+        mock_current_directory.assert_called_once_with(bs.dist_dir)
+        rsync_call = mock_shprint.call_args_list[0]
+        self.assertEqual(rsync_call.args[1:], ("--files-from=bootstrap_distfiles.txt", bs.build_dir, "."))
+        self.assertIn(mock.call("bootstrap_distfiles.txt", "w"), mock_open.call_args_list)
+        self.assertIn(mock.call("local.properties", "w"), mock_open.call_args_list)
+        # ...never copied wholesale by the base class...
+        mock_base_rmdir.assert_not_called()
+        mock_base_shprint.assert_not_called()
+        # ...and the per-arch/final steps of the base class still run
+        mock_distribute_javaclasses.assert_called_once_with(
+            self.ctx.javaclass_dir, dest_dir=os.path.join("src", "main", "java"))
+        mock_assemble_for_arch.assert_called_once_with(self.ctx.archs[0])
+        mock_copy_in_final_files.assert_called_once_with()
+        bs.distribution.save_info.assert_called_once_with(bs.dist_dir)
+
+    def test_not_chosen_automatically(self):
+        bs = Bootstrap.get_bootstrap("qt6", self.ctx)
+        self.assertFalse(bs.can_be_chosen_automatically)
