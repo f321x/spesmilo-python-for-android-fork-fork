@@ -39,8 +39,9 @@ class TestPython3Recipe(RecipeCtx, unittest.TestCase):
         fake_compile_dir = '/fake/compile/dir'
         hostpy = self.recipe.ctx.hostpython = '/fake/hostpython3'
         self.recipe.compile_python_files(fake_compile_dir)
+        # no -OO (keep asserts and docstrings), -s strips the build path from .pyc
         mock_subprocess.assert_called_once_with(
-            [hostpy, '-OO', '-m', 'compileall', '-b', '-f', fake_compile_dir],
+            [hostpy, '-m', 'compileall', '-b', '-s', fake_compile_dir, '-f', fake_compile_dir],
         )
 
     @mock.patch("pythonforandroid.recipe.Recipe.check_recipe_choices")

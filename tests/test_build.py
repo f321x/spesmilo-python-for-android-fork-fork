@@ -101,6 +101,8 @@ class TestTemplates(unittest.TestCase):
     def test_android_manifest_xml(self):
         args = mock.Mock()
         args.min_sdk_version = 12
+        # targetSdkVersion is decoupled from android_api (compileSdk) in this fork
+        args.android_target_sdk_version = 1233
         args.build_mode = 'debug'
         args.native_services = ['abcd', ]
         args.permissions = [
@@ -115,7 +117,7 @@ class TestTemplates(unittest.TestCase):
         render_args = {
             "args": args,
             "service": False,
-            "service_names": [],
+            "service_data": [],
             "android_api": 1234,
             "debug": "debug" in args.build_mode,
             "native_services": args.native_services
@@ -130,7 +132,8 @@ class TestTemplates(unittest.TestCase):
         assert xml.count('android:someParameter="true"') == 1
         assert xml.count('<tag-a><tag-b></tag-b></tag-a>') == 1
         assert xml.count('android:process=":service_') == 0
-        assert xml.count('targetSdkVersion="1234"') == 1
+        assert xml.count('targetSdkVersion="1233"') == 1
+        assert xml.count('targetSdkVersion="1234"') == 0
         assert xml.count('android:debuggable="true"') == 1
         assert xml.count('<service android:name="abcd" />') == 1
         assert xml.count('<uses-permission android:name="android.permission.INTERNET" />') == 1

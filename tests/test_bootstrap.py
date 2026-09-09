@@ -144,7 +144,7 @@ class TestBootstrapBasic(BaseClassSetupBootstrap, unittest.TestCase):
         """A test which will initialize a bootstrap and will check if the
         method :meth:`~pythonforandroid.bootstrap.Bootstrap.all_bootstraps `
         returns the expected values, which should be: `empty", `service_only`,
-        `webview`, `sdl2`, `sdl3` and `qt`
+        `webview`, `sdl2`, `sdl3`, `qt` and `qt6`
         """
         expected_bootstraps = {
             "empty",
@@ -153,6 +153,7 @@ class TestBootstrapBasic(BaseClassSetupBootstrap, unittest.TestCase):
             "webview",
             "sdl2",
             "sdl3",
+            "qt6",
             "qt",
         }
         set_of_bootstraps = Bootstrap.all_bootstraps()
