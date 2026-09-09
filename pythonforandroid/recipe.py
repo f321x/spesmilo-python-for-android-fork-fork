@@ -1062,38 +1062,34 @@ class PythonRecipe(Recipe):
         if len(packages) == 0:
             return
 
-        # check if any hashes are declared
-        hash_pin = any(isinstance(package, HashPinnedDependency) for package in packages)
-
-        if not hash_pin:
-            error(f"hostpython_prerequisites has no hash pinning for recipe={self}")
+        # every prerequisite must be hash pinned (pip's --require-hashes would
+        # reject a partially pinned list anyway, this just fails earlier)
+        unpinned = [p for p in packages if not isinstance(p, HashPinnedDependency)]
+        if unpinned:
+            error(f"hostpython_prerequisites not hash pinned for recipe={self}: {unpinned}")
             exit(1)
 
         with temp_directory() as tempdir:
             with open(join(tempdir, 'requirements.txt'), 'w') as reqfile:
                 for package in packages:
-                    if isinstance(package, HashPinnedDependency):
-                        hashes_str = ''
-                        for h in package.hashes:
-                            hashes_str += f' --hash={h}'
-                        requirement_str = f'{package.package}{hashes_str}'
-                    else:
-                        requirement_str = package
+                    hashes_str = ''
+                    for h in package.hashes:
+                        hashes_str += f' --hash={h}'
+                    requirement_str = f'{package.package}{hashes_str}'
                     reqfile.write(f'{requirement_str}\n')
                     info(requirement_str)
 
             pip_options = [
                 "install",
                 "-r", join(tempdir, "requirements.txt"),
+                "--require-hashes",
+                "--no-build-isolation",
                 # Don't use sources, instead wheels
                 "--only-binary=:all:",
             ]
             if force_upgrade:
                 # Even for hash pinning --upgrade is needed to regen __pycache__ dirs
                 pip_options.append("--upgrade")
-            if hash_pin:
-                pip_options.append('--require-hashes')  # any pkg hash-pinned => *all* must be hash-pinned
-                pip_options.append('--no-build-isolation')
 
             pip_env = self.get_hostrecipe_env()
             shprint(self._host_recipe.pip, *pip_options, _env=pip_env)
