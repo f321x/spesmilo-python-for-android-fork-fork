@@ -68,7 +68,6 @@ class Qt6Recipe(BootstrapNDKRecipe):
             f'libplugins_imageformats_qsvg_{arch_name}.so': 'qtbase/plugins/imageformats',
 
             f'libplugins_iconengines_qsvgicon_{arch_name}.so': 'qtbase/plugins/iconengines',
-            f'libplugins_platforms_qtforandroid_{arch_name}.so': 'qtbase/plugins/platforms',
             f'libplugins_multimedia_androidmediaplugin_{arch_name}.so': 'qtbase/plugins/multimedia',
             f'libplugins_networkinformation_qandroidnetworkinformation_{arch_name}.so': 'qtbase/plugins/networkinformation',
             f'libplugins_tls_qopensslbackend_{arch_name}.so': 'qtbase/plugins/tls',
@@ -136,10 +135,6 @@ class Qt6Recipe(BootstrapNDKRecipe):
             info("libdir: %s" % join(build_dir, 'obj', 'local', arch.arch))
 
             configure = sh.Command('./configure')
-            # options?
-            shprint(configure, '--help', _env=env, _tail=50, _critical=True)
-            shprint(configure, '-list-features', _env=env, _tail=50, _critical=True)
-
             configure = configure.bake('-opensource', '-confirm-license', '-disable-rpath')
             configure = configure.bake('-android-sdk', self.ctx.sdk_dir)
             configure = configure.bake('-android-ndk', self.ctx.ndk_dir)
@@ -163,7 +158,7 @@ class Qt6Recipe(BootstrapNDKRecipe):
             # openssl
             openssl = Recipe.get_recipe('openssl', self.ctx)
             configure = configure.bake('-ssl', '-openssl-runtime')
-            configure = configure.bake('OPENSSL_ROOT_DIR=' + openssl.get_build_dir(arch.arch))  # new?
+            configure = configure.bake('OPENSSL_ROOT_DIR=' + openssl.get_build_dir(arch.arch))
 
             configure = configure.bake('--')
 
