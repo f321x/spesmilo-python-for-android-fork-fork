@@ -1,6 +1,5 @@
 from os.path import join, isfile
 from os import environ
-from multiprocessing import cpu_count
 import sh
 
 from pythonforandroid.recipe import Recipe

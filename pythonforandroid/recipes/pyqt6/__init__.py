@@ -5,7 +5,7 @@ import copy
 import toml
 
 from pythonforandroid.logger import shprint, info
-from pythonforandroid.recipe import PyProjectRecipe, Recipe
+from pythonforandroid.recipe import PyProjectRecipe
 from pythonforandroid.toolchain import current_directory
 
 

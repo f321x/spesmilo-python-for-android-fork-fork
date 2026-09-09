@@ -3,6 +3,7 @@ from os.path import join
 from pythonforandroid.recipe import PyProjectRecipe
 from pythonforandroid.logger import info
 
+
 class SipRecipe(PyProjectRecipe):
     version = '6.15.1'
     url = "https://pypi.python.org/packages/source/s/sip/sip-{version}.tar.gz"
@@ -51,5 +52,6 @@ class SipRecipe(PyProjectRecipe):
         #     shprint(buildcmd, _env=env, _tail=50, _critical=True)
 
         super().build_arch(arch)
+
 
 recipe = SipRecipe()

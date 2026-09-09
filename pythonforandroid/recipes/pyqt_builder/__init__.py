@@ -3,6 +3,7 @@ from os.path import join
 from pythonforandroid.recipe import PyProjectRecipe
 from pythonforandroid.logger import info
 
+
 class PyQtBuilderRecipe(PyProjectRecipe):
     version = '1.19.1'
     url = "https://pypi.python.org/packages/source/P/PyQt-builder/pyqt_builder-{version}.tar.gz"
@@ -33,5 +34,6 @@ class PyQtBuilderRecipe(PyProjectRecipe):
             toml.dump(project_dict, f)
 
         super().build_arch(arch)
+
 
 recipe = PyQtBuilderRecipe()

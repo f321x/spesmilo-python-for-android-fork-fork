@@ -47,7 +47,7 @@ class Qt6Bootstrap(Bootstrap):
                     info(f'pattern {pattern}, recurse={recurse} yielded {len(filenames)} items')
 
             shprint(sh.rsync, '--files-from=bootstrap_distfiles.txt',
-                self.build_dir, '.')
+                    self.build_dir, '.')
 
         with current_directory(self.dist_dir):
             with open('local.properties', 'w') as fileh:
@@ -57,9 +57,9 @@ class Qt6Bootstrap(Bootstrap):
 
             # self.distribute_aars(arch)
             self.distribute_javaclasses(self.ctx.javaclass_dir,
-                dest_dir=join("src", "main", "java"))
+                                        dest_dir=join("src", "main", "java"))
             self.distribute_aidl(self.ctx.aidl_dir,
-                dest_dir=join("src", "main", "aidl"))
+                                 dest_dir=join("src", "main", "aidl"))
 
             for arch in self.ctx.archs:
                 python_bundle_dir = join(f'_python_bundle__{arch.arch}', '_python_bundle')
