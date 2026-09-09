@@ -1100,7 +1100,7 @@ tools directory of the Android SDK.
                     help='Skip byte compile for .py files.')
     ap.add_argument('--no-optimize-python', dest='optimize_python',
                     action='store_false', default=False,
-                    help=('Whether to compile to optimised .pyo files, using -OO '
+                    help=('Whether to compile to optimised .pyc files, using -OO '
                           '(strips docstrings and asserts)'))
     ap.add_argument('--extra-manifest-xml', default='',
                     help=('Extra xml to write directly inside the <manifest> element of'
