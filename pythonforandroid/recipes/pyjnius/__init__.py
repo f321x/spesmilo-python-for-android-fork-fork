@@ -9,7 +9,7 @@ class PyjniusRecipe(PyProjectRecipe):
     version = '1.7.0'
     url = 'https://github.com/kivy/pyjnius/archive/{version}.zip'
     name = 'pyjnius'
-    depends = [('genericndkbuild', 'sdl2', 'sdl3', 'qt6'), 'six']
+    depends = [('genericndkbuild', 'sdl2', 'sdl3', 'qt6')]
     site_packages_name = 'jnius'
     hostpython_prerequisites = ["setuptools>=58.0.0", "wheel", "Cython<3.2"]
     patches = [

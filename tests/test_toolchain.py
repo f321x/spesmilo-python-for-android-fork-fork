@@ -84,7 +84,8 @@ class TestToolchainCL:
             'hostpython3', 'libffi', 'openssl', 'sqlite3', 'python3',
             'genericndkbuild', 'pyjnius', 'android',
         ]
-        python_modules = ['six']
+        # pyjnius no longer depends on six, so nothing is left for pip
+        python_modules = []
         context = mock.ANY
         project_dir = None
         assert m_build_recipes.call_args_list == [
