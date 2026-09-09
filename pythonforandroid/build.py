@@ -102,7 +102,8 @@ class Context:
 
     java_build_tool = 'auto'
 
-    skip_prebuilt = False
+    # prebuilt wheels cannot be hash pinned, never use them unless asked to
+    skip_prebuilt = True
 
     extra_index_urls = []
 

@@ -281,9 +281,17 @@ class ToolchainCL:
 
         generic_parser.add_argument(
             '--skip-prebuilt',
-            help='Always build from source; do not use prebuilt wheels.',
+            help=('Always build from source; do not use prebuilt wheels. '
+                  'This is the default in this fork, as prebuilt wheels '
+                  'cannot be hash-pinned.'),
             action='store_true',
-            default=False,
+            default=True,
+            dest="skip_prebuilt",
+        )
+        generic_parser.add_argument(
+            '--allow-prebuilt',
+            help='Use prebuilt wheels from an index when available.',
+            action='store_false',
             dest="skip_prebuilt",
         )
 
