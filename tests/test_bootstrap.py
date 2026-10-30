@@ -701,3 +701,25 @@ class TestBootstrapQt(GenericBootstrapTest, unittest.TestCase):
     @property
     def bootstrap_name(self):
         return "qt"
+
+
+class TestBootstrapQt6Sources(unittest.TestCase):
+
+    def test_no_kivy_launcher(self):
+        # explicit intents reach PythonActivity whatever its intent filters say
+        bootstraps_dir = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            '../pythonforandroid/bootstraps')
+        offenders = []
+        for bs in ('common', 'qt6'):
+            for root, _, files in os.walk(os.path.join(bootstraps_dir, bs, 'build')):
+                for name in files:
+                    if not name.endswith(('.java', '.xml')):
+                        continue
+                    path = os.path.join(root, name)
+                    with open(path) as f:
+                        content = f.read()
+                    if ('org.kivy.LAUNCH' in content
+                            or 'org.kivy.android.launcher' in content):
+                        offenders.append(os.path.relpath(path, bootstraps_dir))
+        self.assertEqual(offenders, [])
